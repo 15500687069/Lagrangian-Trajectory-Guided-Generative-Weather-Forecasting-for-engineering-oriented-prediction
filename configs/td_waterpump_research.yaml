@@ -1,0 +1,64 @@
+study:
+  region: [110.0, 17.0, 113.0, 20.0] # [lon_min, lat_min, lon_max, lat_max]
+  start_time: "2024-10-28T00:00:00Z"
+  end_time: "2024-10-30T00:00:00Z"
+  gpm_cross_track_lat: 18.8
+  output_dir: "outputs/td_waterpump_research"
+
+paths:
+  era5_raw_dir: "data/td_case/era5_raw"
+  era5_pressure_file: "data/td_case/era5_pressure.nc"
+  era5_single_file: "data/td_case/era5_single.nc"
+  era5_merged_file: "data/td_case/era5_merged.nc"
+  gpm_dir: "data/td_case/gpm"
+  gpm_glob: "data/td_case/gpm/*.h5"
+  selected_gpm_file: ""
+
+download:
+  era5:
+    enabled: true
+    overwrite: false
+    step_hours: 1
+    pressure_levels: [1000, 925, 850, 700, 500]
+    cds_url: ""
+    cds_key_env: "CDSAPI_KEY"
+  gpm:
+    enabled: true
+    provider: "earthaccess" # earthaccess | cmr
+    short_name: "GPM_2ADPR"
+    version: "07"
+    max_granules: 60
+    page_size: 200
+    overwrite: false
+    earthaccess_strategy: "netrc"
+    earthdata_token_env: "EARTHDATA_TOKEN"
+
+analysis:
+  rain_threshold: 0.1
+  reflectivity_threshold: 35.0
+  min_layers: 5
+  min_depth_km: 1.5
+  dz_km: 0.125
+  min_voxels: 20
+  merge_distance_km: 5.0
+  mse_window_radius: 1
+  mse_pressure_level_hpa: 850.0
+  height_range_km: [1.5, 12.0]
+  point_spacing_km: 5.0
+  layer_indices: [135, 136, 137, 138, 139, 140]
+  td_detection:
+    min_wind: 8.5
+    min_pressure_diff: 3.0
+    min_rh: 85.0
+    search_radius_deg: 10.0
+    psi_radius_deg: 3.0
+
+statistics:
+  enabled: true
+  oidra_split_quantile: 0.5
+  filter:
+    min_pump_count: 1
+    min_precip_mean: 0.0
+    max_mean_mse_var_quantile: 0.99
+    min_precip_type_coverage: 0.5
+    require_td_center: true

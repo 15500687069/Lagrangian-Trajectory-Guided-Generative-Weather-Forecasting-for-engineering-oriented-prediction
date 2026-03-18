@@ -1,0 +1,21 @@
+base_config: stage2_stochastic.yaml
+
+experiment:
+  name: ltg_stage2_stochastic_rebalanced
+  output_dir: outputs/stage2_rebalanced
+
+model:
+  event_modulation:
+    enabled: false
+
+loss:
+  lambda_field: 1.0
+  lambda_traj: 1.0
+  lambda_adv: 0.6
+  lambda_phys: 3.0e-5
+  lambda_spec: 0.2
+
+optimization:
+  epochs: 24
+  optimizer:
+    lr: 1.2e-4

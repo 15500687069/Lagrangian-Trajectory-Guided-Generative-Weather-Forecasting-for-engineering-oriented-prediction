@@ -1,0 +1,8 @@
+base_config: stage1_regional.yaml
+
+experiment:
+  name: ltg_prepare_tracks_miniltg
+  output_dir: outputs/prepare_tracks_miniltg
+
+data:
+  track_cache_path: data/skeleton_tracks_miniltg.nc

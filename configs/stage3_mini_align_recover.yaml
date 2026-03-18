@@ -1,0 +1,72 @@
+base_config: stage3_recover.yaml
+
+experiment:
+  name: ltg_stage3_mini_align_recover
+  output_dir: outputs/stage3_mini_align_recover
+
+data:
+  # Mapped from miniltgnet training protocol (lite_plus_track_fix family).
+  track_cache_path: data/skeleton_tracks_stage3_mini.nc
+  norm_stats_path: data/norm_stats_stage3_mini.npz
+  history_steps: 4
+  forecast_steps: 6
+  region:
+    enabled: true
+    # Use latent-diffusion-friendly grid (144x240).
+    lat_min: 10.0
+    lat_max: 45.75
+    lon_min: 110.0
+    lon_max: 169.75
+  dataloader:
+    batch_size: 1
+    num_workers: 0
+
+model:
+  hidden_dim: 64
+  encoder:
+    patch_size: 24
+    depth: 2
+    heads: 4
+    mlp_ratio: 2.0
+    dropout: 0.05
+  trajectory:
+    mode: deterministic
+    hidden_dim: 64
+    num_layers: 2
+    max_step_deg: 6.0
+  generator:
+    type: latent_diffusion
+    diffusion_steps: 200
+    diffusion_beta_start: 1.0e-4
+    diffusion_beta_end: 2.0e-2
+    residual_forecast: true
+
+loss:
+  combine_mode: fixed_weighted
+  lambda_field: 1.0
+  lambda_traj: 0.6
+  lambda_adv: 0.0
+  lambda_phys: 0.0
+  lambda_spec: 0.0
+  field_extreme_weight: 0.0
+  field_extreme_quantile: 0.99
+  normalization:
+    enabled: false
+  curriculum:
+    enabled: false
+
+optimization:
+  epochs: 18
+  optimizer:
+    lr: 1.8e-4
+
+evaluation:
+  checkpoint_metric: loss_total
+  checkpoint_mode: min
+  early_stopping:
+    enabled: true
+    monitor: loss_total
+    mode: min
+    patience: 5
+    min_delta: 1.0e-4
+    warmup_epochs: 3

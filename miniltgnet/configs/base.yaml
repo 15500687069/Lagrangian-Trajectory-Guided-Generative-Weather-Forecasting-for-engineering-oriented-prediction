@@ -1,0 +1,156 @@
+experiment:
+  name: miniltg_base
+  output_dir: outputs/miniltg/base
+  seed: 3407
+  deterministic: false
+  device: cuda
+  resume_checkpoint: null
+  resume_strict: false
+  resume_reset_best: false
+  resume_optimizer: false
+  resume_scheduler: false
+
+data:
+  era5_path: data/era5_199001.nc
+  track_cache_path: data/skeleton_tracks_miniltg.nc
+  norm_stats_path: data/miniltg_norm_stats.npz
+  split:
+    train_start: "1990-01-01"
+    train_end: "1990-01-15"
+    val_start: "1990-01-16"
+    val_end: "1990-01-23"
+    test_start: "1990-01-24"
+    test_end: "1990-01-31"
+  variables:
+    - z500
+    - z850
+    - u850
+    - v850
+    - t850
+    - q850
+    - msl
+    - tp
+  history_steps: 4
+  forecast_steps: 6
+  stride: 1
+  region:
+    enabled: true
+    lat_min: 5.0
+    lat_max: 50.0
+    lon_min: 100.0
+    lon_max: 180.0
+  dataloader:
+    batch_size: 1
+    num_workers: 0
+    pin_memory: true
+
+model:
+  hidden_dim: 64
+  traj_hidden_dim: 64
+  traj_max_step_deg: 1.2
+  field_hidden_dim: 48
+  context_channels: 8
+  raster_sigma_deg: 2.0
+  residual_scale: 0.5
+  dropout: 0.0
+  traj_refine_enabled: false
+  traj_refine_hidden_dim: 64
+  traj_refine_max_deg: 1.2
+  hf_refine_enabled: false
+  hf_refine_hidden_dim: 48
+  hf_refine_scale: 0.0
+
+loss:
+  lambda_field: 1.0
+  lambda_traj: 0.4
+  lambda_spec: 0.0
+  traj_lambda_ramp_epochs: 0
+  spec_lambda_ramp_epochs: 0
+  traj_scale_deg: 20.0
+  traj_mae_weight: 0.0
+  traj_velocity_weight: 0.0
+  traj_velocity_scale_deg: 20.0
+  traj_smooth_weight: 0.0
+  traj_smooth_scale_deg: 20.0
+  traj_geo_weight: 0.0
+  traj_geo_scale_km: 120.0
+  traj_heading_weight: 0.0
+  field_l1_weight: 0.7
+  field_l2_weight: 0.3
+  field_extreme_weight: 0.0
+  field_extreme_quantile: 0.99
+  field_extreme_max_elements: 1000000
+  spec_high_freq_power: 1.5
+  spec_full_weight: 1.0
+  spec_high_weight: 0.0
+  spec_band_weight: 0.0
+  spec_band_low_cut: 0.25
+  spec_band_high_cut: 0.65
+  spec_band_low_weight: 0.1
+  spec_band_mid_weight: 0.3
+  spec_band_high_weight: 0.6
+  spec_grad_weight: 0.0
+  spec_lap_weight: 0.0
+  spec_max_wavenumber: 32
+
+optimization:
+  epochs: 16
+  lr: 2.0e-4
+  min_lr: 1.0e-6
+  weight_decay: 1.0e-4
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  max_train_batches: 0
+  max_val_batches: 0
+  fail_on_nan: true
+
+evaluation:
+  validate_every: 1
+  save_every: 1
+  test_every: 1
+  test_max_batches: 0
+  spectral_wavenumbers: 32
+  inference_postprocess:
+    enabled: false
+    traj_enabled: true
+    traj_ref_mode: mixed
+    traj_blend_linear: 0.30
+    traj_blend_persistence: 0.10
+    traj_lead_persistence_boost: 0.55
+    traj_confidence_power: 1.4
+    traj_global_persistence_weight: 0.0
+    traj_persistence_prefix_leads: 0
+    traj_prefix_persistence_weight: 1.0
+    traj_speed_sigma: 0.70
+    traj_min_model_weight: 0.35
+    traj_max_correction_deg: 1.50
+    spectral_enabled: true
+    spectral_hf_blend: 0.16
+    spectral_mid_blend: 0.06
+    spectral_lead_boost: 0.18
+    spectral_k_ratio: 0.45
+    spectral_gain_strength: 0.25
+    spectral_power_match: 0.30
+    spectral_global_persistence_weight: 0.0
+    spectral_gain_min_k: 2
+    spectral_gain_clip_min: 0.85
+    spectral_gain_clip_max: 1.15
+  checkpoint_metric: loss_total
+  checkpoint_mode: min
+  checkpoint_min_delta: 0.0
+  use_ema_for_eval: true
+  save_history: true
+  history_file: metrics_history.jsonl
+  test_metrics_file: test_metrics.jsonl
+  early_stopping:
+    enabled: true
+    monitor: loss_total
+    mode: min
+    patience: 3
+    min_delta: 1.0e-4
+    warmup_epochs: 2
+
+ema:
+  enabled: true
+  decay: 0.995
+  start_step: 0

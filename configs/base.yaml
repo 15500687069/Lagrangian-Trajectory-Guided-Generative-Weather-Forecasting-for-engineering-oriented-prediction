@@ -1,0 +1,154 @@
+experiment:
+  name: ltg_net
+  output_dir: outputs
+  seed: 3407
+  precision: fp32
+  device: cuda
+  resume_checkpoint: null
+
+data:
+  era5_path: data/era5_199001.nc
+  track_cache_path: data/skeleton_tracks.nc
+  norm_stats_path: data/norm_stats.npz
+  split:
+    train_start: "1990-01-01"
+    train_end: "1990-01-15"
+    val_start: "1990-01-16"
+    val_end: "1990-01-23"
+    test_start: "1990-01-24"
+    test_end: "1990-01-31"
+  variables:
+    - z500
+    - z850
+    - u850
+    - v850
+    - t850
+    - q850
+    - msl
+    - tp
+  history_steps: 8
+  forecast_steps: 20
+  stride: 1
+  objects_per_step: 3
+  skeleton:
+    type: vorticity_max
+    min_distance_deg: 3.0
+    vorticity_threshold: 1.2e-5
+    pressure_threshold: 1010.0
+    max_link_distance_deg: 5.0
+    min_track_length: 8
+  region:
+    enabled: false
+    lat_min: -90.0
+    lat_max: 90.0
+    lon_min: 0.0
+    lon_max: 360.0
+  dataloader:
+    batch_size: 4
+    num_workers: 4
+    pin_memory: true
+
+model:
+  hidden_dim: 256
+  encoder:
+    patch_size: 4
+    depth: 8
+    heads: 8
+    mlp_ratio: 4.0
+    dropout: 0.1
+  trajectory:
+    mode: deterministic
+    hidden_dim: 256
+    num_layers: 2
+    diffusion_min: 0.01
+    diffusion_max: 0.12
+    num_samples: 6
+    max_step_deg: 2.5
+  generator:
+    type: unet
+    base_channels: 64
+    channel_mults: [1, 2, 4, 8]
+    num_res_blocks: 2
+    dropout: 0.1
+    diffusion_steps: 1000
+    diffusion_beta_start: 1.0e-4
+    diffusion_beta_end: 2.0e-2
+    residual_forecast: true
+    trend_scale: 0.35
+    residual_scale: 1.0
+  event_modulation:
+    enabled: true
+    curvature_scale: 2.0
+    gradient_scale: 1.0
+    dyn_scale: 1.0
+    thermo_scale: 1.0
+    alpha_floor: 0.8
+    alpha_ceiling: 2.5
+
+loss:
+  combine_mode: fixed_weighted
+  lambda_field: 1.0
+  lambda_traj: 0.6
+  lambda_adv: 0.8
+  lambda_phys: 0.4
+  lambda_spec: 0.6
+  lambda_diff: 1.0
+  compute_inactive_losses: true
+  field_l1_weight: 0.7
+  field_l2_weight: 0.3
+  field_extreme_weight: 0.0
+  field_extreme_quantile: 0.98
+  field_extreme_max_elements: 2000000
+  spectral_wavenumbers: 64
+  normalization:
+    enabled: false
+    ema_decay: 0.98
+    eps: 1.0e-6
+  curriculum:
+    enabled: false
+    adv_start_epoch: 0
+    phys_start_epoch: 0
+    spec_start_epoch: 0
+    ramp_epochs: 1
+  physics:
+    divergence_weight: 0.5
+    moist_static_energy_weight: 0.5
+    strict_pde:
+      enabled: false
+      time_step_hours: 6.0
+      continuity_weight: 1.0
+      continuity_zero_reg: 0.1
+      vorticity_weight: 1.0
+      vorticity_viscosity: 0.0
+      include_beta_term: true
+      thermodynamic_weight: 0.6
+      moisture_weight: 0.6
+      geostrophic_weight: 0.4
+      f_min: 1.0e-5
+
+optimization:
+  epochs: 40
+  grad_clip_norm: 1.0
+  max_train_batches: 0
+  max_val_batches: 0
+  fail_on_nan: true
+  optimizer:
+    name: adamw
+    lr: 2.0e-4
+    betas: [0.9, 0.999]
+    weight_decay: 0.01
+  scheduler:
+    name: cosine
+    warmup_epochs: 2
+    min_lr: 1.0e-6
+
+evaluation:
+  save_every: 1
+  validate_every: 1
+  checkpoint_metric: loss_total
+  metrics:
+    - rmse
+    - acc
+    - track_mae
+    - extreme_f1
+    - spectral_distance

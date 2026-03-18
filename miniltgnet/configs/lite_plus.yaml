@@ -1,0 +1,41 @@
+base_config: lite.yaml
+
+experiment:
+  name: miniltg_lite_plus
+  output_dir: outputs/miniltg/lite_plus
+
+model:
+  hidden_dim: 64
+  traj_hidden_dim: 64
+  field_hidden_dim: 48
+  context_channels: 8
+  residual_scale: 0.35
+  dropout: 0.05
+
+loss:
+  lambda_traj: 0.45
+  field_extreme_weight: 0.12
+  field_extreme_quantile: 0.99
+
+optimization:
+  epochs: 16
+  lr: 2.0e-4
+  weight_decay: 5.0e-5
+  grad_accum_steps: 2
+
+evaluation:
+  checkpoint_metric: loss_total
+  checkpoint_mode: min
+  checkpoint_min_delta: 5.0e-5
+  early_stopping:
+    enabled: true
+    monitor: loss_total
+    mode: min
+    patience: 4
+    min_delta: 5.0e-5
+    warmup_epochs: 3
+
+ema:
+  enabled: true
+  decay: 0.997
+  start_step: 10

@@ -1,0 +1,16 @@
+base_config: stage2_stochastic_v2.yaml
+
+experiment:
+  name: ltg_stage2_stochastic_v2_sanity
+  output_dir: outputs/stage2_v2_sanity
+
+optimization:
+  epochs: 2
+  max_train_batches: 2
+  max_val_batches: 1
+  optimizer:
+    lr: 8.0e-5
+
+evaluation:
+  save_every: 1
+  validate_every: 1

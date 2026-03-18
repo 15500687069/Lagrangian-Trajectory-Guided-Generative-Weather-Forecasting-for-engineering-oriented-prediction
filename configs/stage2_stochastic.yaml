@@ -1,0 +1,45 @@
+base_config: base.yaml
+
+experiment:
+  name: ltg_stage2_stochastic
+  output_dir: outputs/stage2
+
+data:
+  region:
+    enabled: true
+    lat_min: 0.0
+    lat_max: 55.0
+    lon_min: 90.0
+    lon_max: 200.0
+  history_steps: 8
+  forecast_steps: 10
+  dataloader:
+    batch_size: 1
+    num_workers: 0
+
+model:
+  hidden_dim: 128
+  encoder:
+    patch_size: 16
+    depth: 3
+    heads: 4
+    mlp_ratio: 2.0
+  trajectory:
+    mode: stochastic
+    hidden_dim: 128
+    num_samples: 8
+  generator:
+    type: unet
+    base_channels: 32
+    channel_mults: [1, 2, 4]
+  event_modulation:
+    enabled: true
+
+loss:
+  lambda_adv: 1.0
+  lambda_spec: 0.8
+
+optimization:
+  epochs: 40
+  optimizer:
+    lr: 2.0e-4

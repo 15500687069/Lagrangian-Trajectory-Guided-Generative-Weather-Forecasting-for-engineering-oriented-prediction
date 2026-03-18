@@ -1,0 +1,57 @@
+base_config: stage3_recover.yaml
+
+experiment:
+  name: ltg_stage3_finetune
+  output_dir: outputs/stage3_finetune
+  resume_checkpoint: outputs/stage3_recover/best.pt
+  performance:
+    allow_tf32: true
+    cudnn_benchmark: true
+    matmul_precision: high
+  compile:
+    enabled: false
+    mode: default
+    dynamic: false
+    fullgraph: false
+    strict: false
+
+loss:
+  combine_mode: fixed_weighted
+  lambda_field: 1.0
+  lambda_traj: 0.3
+  lambda_adv: 0.08
+  lambda_phys: 0.01
+  lambda_spec: 0.05
+  field_extreme_weight: 0.12
+  field_extreme_quantile: 0.99
+  normalization:
+    enabled: false
+  curriculum:
+    enabled: true
+    adv_start_epoch: 2
+    phys_start_epoch: 8
+    spec_start_epoch: 4
+    ramp_epochs: 6
+
+optimization:
+  epochs: 18
+  optimizer:
+    lr: 4.0e-5
+
+evaluation:
+  validate_every: 1
+  save_every: 1
+  checkpoint_metric: loss_total_raw
+  checkpoint_mode: min
+  test_every: 1
+  test_max_batches: 0
+  save_history: true
+  history_file: metrics_history.jsonl
+  test_metrics_file: test_metrics.jsonl
+  early_stopping:
+    enabled: true
+    monitor: loss_total_raw
+    mode: min
+    patience: 4
+    min_delta: 1.0e-4
+    warmup_epochs: 4

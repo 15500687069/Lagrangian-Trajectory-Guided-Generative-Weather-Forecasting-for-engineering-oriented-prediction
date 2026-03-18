@@ -1,0 +1,107 @@
+base_config: stage3_recover.yaml
+
+experiment:
+  name: ltg_stage3_strict_pde_recover
+  output_dir: outputs/stage3_strict_pde_recover
+  precision: fp16
+  performance:
+    allow_tf32: true
+    cudnn_benchmark: false
+    matmul_precision: medium
+
+data:
+  history_steps: 4
+  forecast_steps: 6
+  region:
+    enabled: true
+    lat_min: 10.0
+    lat_max: 45.75
+    lon_min: 110.0
+    lon_max: 169.75
+  dataloader:
+    batch_size: 1
+    num_workers: 0
+    pin_memory: false
+
+model:
+  hidden_dim: 64
+  encoder:
+    patch_size: 24
+    depth: 2
+    heads: 4
+    mlp_ratio: 2.0
+    dropout: 0.05
+  trajectory:
+    mode: deterministic
+    hidden_dim: 64
+    num_layers: 2
+    max_step_deg: 1.2
+  generator:
+    type: unet
+    base_channels: 32
+    channel_mults: [1, 2, 4]
+    num_res_blocks: 1
+    dropout: 0.05
+    residual_forecast: true
+    trend_scale: 0.30
+    residual_scale: 0.80
+
+loss:
+  combine_mode: fixed_weighted
+  lambda_field: 1.0
+  lambda_traj: 0.3
+  lambda_adv: 0.03
+  lambda_phys: 0.16
+  lambda_spec: 0.0
+  field_extreme_weight: 0.0
+  normalization:
+    enabled: false
+  curriculum:
+    enabled: false
+  physics:
+    divergence_weight: 0.35
+    moist_static_energy_weight: 0.25
+    strict_pde:
+      enabled: true
+      time_step_hours: 6.0
+      continuity_weight: 1.0
+      continuity_zero_reg: 0.15
+      vorticity_weight: 1.0
+      vorticity_viscosity: 0.0
+      include_beta_term: true
+      thermodynamic_weight: 0.8
+      moisture_weight: 0.8
+      geostrophic_weight: 0.6
+      f_min: 1.0e-5
+
+optimization:
+  epochs: 10
+  grad_clip_norm: 0.8
+  max_train_batches: 0
+  max_val_batches: 0
+  fail_on_nan: true
+  optimizer:
+    lr: 6.0e-5
+    weight_decay: 1.0e-4
+  scheduler:
+    name: cosine
+    warmup_epochs: 2
+    min_lr: 1.0e-6
+
+evaluation:
+  validate_every: 1
+  save_every: 1
+  checkpoint_metric: loss_total_raw
+  checkpoint_mode: min
+  test_every: 1
+  test_max_batches: 0
+  save_history: true
+  history_file: metrics_history.jsonl
+  test_metrics_file: test_metrics.jsonl
+  early_stopping:
+    enabled: true
+    monitor: loss_total_raw
+    mode: min
+    patience: 3
+    min_delta: 1.0e-4
+    warmup_epochs: 2

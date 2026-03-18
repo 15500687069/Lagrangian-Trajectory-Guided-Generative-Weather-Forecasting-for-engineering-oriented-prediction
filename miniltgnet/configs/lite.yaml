@@ -1,0 +1,48 @@
+base_config: base.yaml
+
+experiment:
+  name: miniltg_lite
+  output_dir: outputs/miniltg/lite
+
+data:
+  history_steps: 4
+  forecast_steps: 6
+  region:
+    enabled: true
+    lat_min: 10.0
+    lat_max: 45.0
+    lon_min: 110.0
+    lon_max: 170.0
+  dataloader:
+    batch_size: 1
+    num_workers: 0
+
+model:
+  hidden_dim: 48
+  traj_hidden_dim: 48
+  traj_max_step_deg: 1.0
+  field_hidden_dim: 32
+  context_channels: 6
+  raster_sigma_deg: 1.8
+  residual_scale: 0.4
+
+loss:
+  lambda_field: 1.0
+  lambda_traj: 0.3
+  field_extreme_weight: 0.08
+  field_extreme_quantile: 0.99
+
+optimization:
+  epochs: 12
+  lr: 2.5e-4
+
+evaluation:
+  checkpoint_metric: loss_total
+  checkpoint_mode: min
+  early_stopping:
+    enabled: true
+    monitor: loss_total
+    mode: min
+    patience: 3
+    min_delta: 1.0e-4
+    warmup_epochs: 2

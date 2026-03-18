@@ -1,0 +1,29 @@
+base_config: lite_plus.yaml
+
+experiment:
+  name: miniltg_lite_plus_v2
+  output_dir: outputs/miniltg/lite_plus_v2
+
+model:
+  # The previous 1.0~1.2 deg cap was too strict for repaired tracks.
+  traj_max_step_deg: 10.0
+
+loss:
+  # Stronger trajectory recovery.
+  lambda_traj: 0.75
+  traj_scale_deg: 10.0
+  traj_mae_weight: 0.6
+  traj_velocity_weight: 0.4
+  traj_velocity_scale_deg: 10.0
+
+  # High-frequency spectrum fidelity.
+  lambda_spec: 0.08
+  spec_high_freq_power: 2.0
+
+optimization:
+  epochs: 20
+
+evaluation:
+  early_stopping:
+    patience: 5
+    warmup_epochs: 4

@@ -1,0 +1,32 @@
+base_config: lite_plus_track_fix.yaml
+
+experiment:
+  name: miniltg_lite_plus_spec_finetune
+  output_dir: outputs/miniltg/lite_plus_spec_finetune
+  # Set this to track-fix best checkpoint before running.
+  resume_checkpoint: outputs/miniltg/lite_plus_track_fix/best.pt
+
+loss:
+  # Keep track regularization active but slightly relaxed.
+  lambda_traj: 0.55
+  traj_mae_weight: 0.25
+  traj_velocity_weight: 0.12
+  traj_smooth_weight: 0.08
+
+  # Small spectrum finetune aligned to evaluation metric.
+  lambda_spec: 0.02
+  spec_full_weight: 1.0
+  spec_high_weight: 0.0
+  spec_max_wavenumber: 32
+
+optimization:
+  # Finetune 8 extra epochs on top of resumed checkpoint.
+  epochs_mode: additional
+  epochs: 8
+  lr: 6.0e-5
+  min_lr: 1.0e-6
+
+evaluation:
+  early_stopping:
+    patience: 3
+    warmup_epochs: 2

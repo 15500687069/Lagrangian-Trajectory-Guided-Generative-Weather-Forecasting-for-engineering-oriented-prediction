@@ -1,0 +1,8 @@
+base_config: lite_plus.yaml
+
+experiment:
+  name: miniltg_ablation_no_extreme
+  output_dir: outputs/miniltg/ablation_no_extreme
+
+loss:
+  field_extreme_weight: 0.0

@@ -1,0 +1,66 @@
+base_config: stage3_global.yaml
+
+experiment:
+  name: ltg_stage3_redesign
+  output_dir: outputs/stage3_redesign
+  performance:
+    allow_tf32: true
+    cudnn_benchmark: true
+    matmul_precision: high
+  compile:
+    enabled: false
+    mode: default
+    dynamic: false
+    fullgraph: false
+    strict: false
+
+model:
+  event_modulation:
+    enabled: false
+  trajectory:
+    max_step_deg: 1.5
+  generator:
+    residual_forecast: true
+
+loss:
+  combine_mode: normalized_weighted
+  lambda_field: 1.0
+  lambda_traj: 1.0
+  lambda_adv: 0.5
+  lambda_phys: 0.15
+  lambda_spec: 0.25
+  field_extreme_weight: 0.08
+  field_extreme_quantile: 0.99
+  normalization:
+    enabled: true
+    ema_decay: 0.97
+    eps: 1.0e-6
+  curriculum:
+    enabled: true
+    adv_start_epoch: 2
+    phys_start_epoch: 8
+    spec_start_epoch: 2
+    ramp_epochs: 6
+
+optimization:
+  epochs: 20
+  optimizer:
+    lr: 1.0e-4
+
+evaluation:
+  validate_every: 1
+  save_every: 1
+  checkpoint_metric: loss_total_raw
+  checkpoint_mode: min
+  test_every: 1
+  test_max_batches: 0
+  save_history: true
+  history_file: metrics_history.jsonl
+  test_metrics_file: test_metrics.jsonl
+  early_stopping:
+    enabled: true
+    monitor: loss_total_raw
+    mode: min
+    patience: 5
+    min_delta: 1.0e-4
+    warmup_epochs: 4

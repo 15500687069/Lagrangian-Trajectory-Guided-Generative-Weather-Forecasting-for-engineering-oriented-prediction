@@ -1,0 +1,82 @@
+base_config: lite_plus_track_fix.yaml
+
+experiment:
+  name: miniltg_lite_plus_dual_opt
+  output_dir: outputs/miniltg/lite_plus_dual_opt
+  resume_checkpoint: outputs/miniltg/lite_plus_track_fix/best.pt
+  resume_reset_best: true
+
+model:
+  traj_refine_enabled: true
+  traj_refine_hidden_dim: 96
+  traj_refine_max_deg: 1.5
+  hf_refine_enabled: true
+  hf_refine_hidden_dim: 64
+  hf_refine_scale: 0.12
+
+loss:
+  # Keep strong trajectory supervision while improving geo-consistency.
+  lambda_traj: 0.58
+  traj_scale_deg: 12.0
+  traj_mae_weight: 0.30
+  traj_velocity_weight: 0.15
+  traj_smooth_weight: 0.10
+  traj_geo_weight: 0.20
+  traj_geo_scale_km: 120.0
+  traj_heading_weight: 0.06
+  traj_lambda_ramp_epochs: 3
+
+  # Spectrum branch: full-band + high-band + structure consistency.
+  lambda_spec: 0.03
+  spec_lambda_ramp_epochs: 5
+  spec_full_weight: 1.0
+  spec_high_weight: 0.35
+  spec_high_freq_power: 2.1
+  spec_band_weight: 0.50
+  spec_band_low_cut: 0.22
+  spec_band_high_cut: 0.60
+  spec_band_low_weight: 0.10
+  spec_band_mid_weight: 0.25
+  spec_band_high_weight: 0.65
+  spec_grad_weight: 0.08
+  spec_lap_weight: 0.08
+
+optimization:
+  epochs_mode: additional
+  epochs: 12
+  lr: 5.0e-5
+  min_lr: 1.0e-6
+
+evaluation:
+  checkpoint_metric: loss_total
+  checkpoint_mode: min
+  inference_postprocess:
+    enabled: true
+    traj_enabled: true
+    traj_ref_mode: persistence
+    traj_blend_linear: 0.45
+    traj_blend_persistence: 0.20
+    traj_lead_persistence_boost: 0.75
+    traj_confidence_power: 1.7
+    traj_global_persistence_weight: 0.12
+    traj_persistence_prefix_leads: 4
+    traj_prefix_persistence_weight: 1.0
+    traj_speed_sigma: 0.55
+    traj_min_model_weight: 0.22
+    traj_max_correction_deg: 1.20
+    spectral_enabled: true
+    spectral_hf_blend: 0.28
+    spectral_mid_blend: 0.12
+    spectral_lead_boost: 0.24
+    spectral_k_ratio: 0.42
+    spectral_gain_strength: 0.36
+    spectral_power_match: 0.42
+    spectral_global_persistence_weight: 0.22
+    spectral_gain_min_k: 2
+    spectral_gain_clip_min: 0.78
+    spectral_gain_clip_max: 1.24
+  early_stopping:
+    monitor: loss_total
+    mode: min
+    patience: 4
+    warmup_epochs: 2

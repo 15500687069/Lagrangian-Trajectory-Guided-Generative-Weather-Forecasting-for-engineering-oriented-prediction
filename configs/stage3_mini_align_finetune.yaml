@@ -1,0 +1,37 @@
+base_config: stage3_mini_align_recover.yaml
+
+experiment:
+  name: ltg_stage3_mini_align_finetune
+  output_dir: outputs/stage3_mini_align_finetune
+  resume_checkpoint: outputs/stage3_mini_align_recover/best.pt
+
+loss:
+  combine_mode: fixed_weighted
+  lambda_field: 1.0
+  lambda_traj: 0.55
+  lambda_adv: 0.0
+  lambda_phys: 0.0
+  lambda_spec: 0.02
+  field_extreme_weight: 0.0
+  field_extreme_quantile: 0.99
+  normalization:
+    enabled: false
+  curriculum:
+    enabled: false
+
+optimization:
+  # Resume from recover and continue for +8 epochs (18 -> 26).
+  epochs: 26
+  optimizer:
+    lr: 6.0e-5
+
+evaluation:
+  checkpoint_metric: loss_total
+  checkpoint_mode: min
+  early_stopping:
+    enabled: true
+    monitor: loss_total
+    mode: min
+    patience: 3
+    min_delta: 1.0e-4
+    warmup_epochs: 2

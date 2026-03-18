@@ -1,0 +1,38 @@
+base_config: base.yaml
+
+experiment:
+  name: ltg_stage1_regional
+  output_dir: outputs/stage1
+
+data:
+  region:
+    enabled: true
+    lat_min: 0.0
+    lat_max: 45.0
+    lon_min: 100.0
+    lon_max: 180.0
+  history_steps: 6
+  forecast_steps: 8
+  dataloader:
+    batch_size: 1
+    num_workers: 0
+
+model:
+  hidden_dim: 128
+  encoder:
+    patch_size: 16
+    depth: 3
+    heads: 4
+    mlp_ratio: 2.0
+  trajectory:
+    mode: deterministic
+    hidden_dim: 128
+  generator:
+    type: unet
+    base_channels: 32
+    channel_mults: [1, 2, 4]
+
+optimization:
+  epochs: 20
+  optimizer:
+    lr: 2.0e-4

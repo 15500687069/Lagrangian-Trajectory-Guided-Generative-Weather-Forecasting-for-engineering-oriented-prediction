@@ -1,0 +1,61 @@
+base_config: stage3_mini_align_strict_pde_finetune.yaml
+
+experiment:
+  name: ltg_stage3_mini_align_strict_pde_traj_tune
+  output_dir: outputs/stage3_mini_align_strict_pde_traj_tune
+  resume_checkpoint: outputs/stage3_mini_align_strict_pde_finetune/best.pt
+  resume_reset_best: true
+  trainable:
+    enabled: true
+    include_patterns: ["traj_predictor"]
+    exclude_patterns: []
+
+loss:
+  # Trajectory-priority tune with strict PDE constraints enabled.
+  lambda_field: 0.0
+  lambda_traj: 1.0
+  lambda_adv: 0.0
+  lambda_phys: 0.18
+  lambda_spec: 0.0
+  lambda_diff: 0.0
+  compute_inactive_losses: false
+  curriculum:
+    enabled: true
+    adv_start_epoch: 99
+    phys_start_epoch: 0
+    spec_start_epoch: 99
+    ramp_epochs: 4
+  physics:
+    divergence_weight: 0.35
+    moist_static_energy_weight: 0.25
+    strict_pde:
+      enabled: true
+      time_step_hours: 6.0
+      continuity_weight: 1.0
+      continuity_zero_reg: 0.15
+      vorticity_weight: 1.0
+      vorticity_viscosity: 0.0
+      include_beta_term: true
+      thermodynamic_weight: 0.8
+      moisture_weight: 0.8
+      geostrophic_weight: 0.6
+      f_min: 1.0e-5
+
+optimization:
+  # Continue from finetune checkpoint with smaller LR.
+  epochs: 38
+  optimizer:
+    lr: 1.0e-5
+
+evaluation:
+  checkpoint_metric: loss_total_raw
+  checkpoint_mode: min
+  dual_best:
+    enabled: false
+  early_stopping:
+    enabled: true
+    monitor: loss_total_raw
+    mode: min
+    patience: 4
+    min_delta: 1.0e-4
+    warmup_epochs: 1

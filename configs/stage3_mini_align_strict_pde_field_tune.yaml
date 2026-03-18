@@ -1,0 +1,81 @@
+base_config: stage3_mini_align_strict_pde_finetune.yaml
+
+experiment:
+  name: ltg_stage3_mini_align_strict_pde_field_tune
+  output_dir: outputs/stage3_mini_align_strict_pde_field_tune
+  resume_checkpoint: outputs/stage3_mini_align_strict_pde_finetune/best.pt
+  resume_reset_best: true
+  # Field-priority: freeze trajectory head parameters, keep encoder/generator trainable.
+  trainable:
+    enabled: true
+    include_patterns: ["encoder", "generator"]
+    exclude_patterns: ["traj_predictor"]
+
+data:
+  # Reallocate existing month data: use more train days, keep test window unchanged.
+  split:
+    train_start: "1990-01-01"
+    train_end: "1990-01-19"
+    val_start: "1990-01-20"
+    val_end: "1990-01-23"
+    test_start: "1990-01-24"
+    test_end: "1990-01-31"
+
+loss:
+  combine_mode: fixed_weighted
+  # Field-priority objective with light trajectory anchor to avoid severe drift.
+  lambda_field: 1.0
+  lambda_traj: 0.12
+  lambda_adv: 0.0
+  lambda_phys: 0.10
+  lambda_spec: 0.08
+  lambda_diff: 1.0
+  compute_inactive_losses: false
+  field_extreme_weight: 0.04
+  field_extreme_quantile: 0.99
+  curriculum:
+    enabled: true
+    adv_start_epoch: 99
+    phys_start_epoch: 3
+    spec_start_epoch: 2
+    ramp_epochs: 8
+  physics:
+    divergence_weight: 0.35
+    moist_static_energy_weight: 0.25
+    strict_pde:
+      enabled: true
+      time_step_hours: 6.0
+      continuity_weight: 0.80
+      continuity_zero_reg: 0.12
+      vorticity_weight: 0.65
+      vorticity_viscosity: 0.0
+      include_beta_term: true
+      thermodynamic_weight: 0.55
+      moisture_weight: 0.55
+      geostrophic_weight: 0.35
+      f_min: 1.0e-5
+
+optimization:
+  # Continue from finetune stage with smaller LR and longer convergence window.
+  epochs: 42
+  optimizer:
+    lr: 2.5e-5
+
+evaluation:
+  checkpoint_metric: loss_field
+  checkpoint_mode: min
+  dual_best:
+    enabled: true
+    field_monitor: loss_field
+    field_mode: min
+    field_filename: best_field.pt
+    track_monitor: loss_traj
+    track_mode: min
+    track_filename: best_track.pt
+  early_stopping:
+    enabled: true
+    monitor: loss_field
+    mode: min
+    patience: 6
+    min_delta: 1.0e-4
+    warmup_epochs: 2

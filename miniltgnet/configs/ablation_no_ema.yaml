@@ -1,0 +1,11 @@
+base_config: lite_plus.yaml
+
+experiment:
+  name: miniltg_ablation_no_ema
+  output_dir: outputs/miniltg/ablation_no_ema
+
+evaluation:
+  use_ema_for_eval: false
+
+ema:
+  enabled: false

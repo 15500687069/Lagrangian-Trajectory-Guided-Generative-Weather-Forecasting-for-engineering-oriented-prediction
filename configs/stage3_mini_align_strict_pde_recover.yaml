@@ -1,0 +1,56 @@
+base_config: stage3_mini_align_recover.yaml
+
+experiment:
+  name: ltg_stage3_mini_align_strict_pde_recover
+  output_dir: outputs/stage3_mini_align_strict_pde_recover
+
+data:
+  # Use the earliest existing local dataset by default.
+  era5_path: data/era5_199001.nc
+
+loss:
+  combine_mode: fixed_weighted
+  lambda_field: 1.0
+  lambda_traj: 0.6
+  lambda_adv: 0.03
+  lambda_phys: 0.18
+  lambda_spec: 0.0
+  physics:
+    divergence_weight: 0.35
+    moist_static_energy_weight: 0.25
+    strict_pde:
+      enabled: true
+      time_step_hours: 6.0
+      continuity_weight: 1.0
+      continuity_zero_reg: 0.15
+      vorticity_weight: 1.0
+      vorticity_viscosity: 0.0
+      include_beta_term: true
+      thermodynamic_weight: 0.8
+      moisture_weight: 0.8
+      geostrophic_weight: 0.6
+      f_min: 1.0e-5
+
+optimization:
+  epochs: 20
+  optimizer:
+    lr: 1.2e-4
+
+evaluation:
+  checkpoint_metric: loss_total_raw
+  checkpoint_mode: min
+  dual_best:
+    enabled: true
+    field_monitor: loss_field
+    field_mode: min
+    field_filename: best_field.pt
+    track_monitor: loss_traj
+    track_mode: min
+    track_filename: best_track.pt
+  early_stopping:
+    enabled: true
+    monitor: loss_total_raw
+    mode: min
+    patience: 5
+    min_delta: 1.0e-4
+    warmup_epochs: 3

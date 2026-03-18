@@ -1,0 +1,34 @@
+base_config: lite_plus_dual_opt.yaml
+
+experiment:
+  name: miniltg_lite_final
+  output_dir: outputs/miniltg/lite_final
+
+# Finalized mini configuration aligned with strict benchmark v4.
+evaluation:
+  inference_postprocess:
+    enabled: true
+    traj_enabled: true
+    traj_ref_mode: persistence
+    traj_blend_linear: 0.45
+    traj_blend_persistence: 0.20
+    traj_lead_persistence_boost: 0.75
+    traj_confidence_power: 1.7
+    traj_global_persistence_weight: 0.12
+    traj_persistence_prefix_leads: 4
+    traj_prefix_persistence_weight: 1.0
+    traj_speed_sigma: 0.55
+    traj_min_model_weight: 0.22
+    traj_max_correction_deg: 1.20
+    spectral_enabled: true
+    spectral_hf_blend: 0.28
+    spectral_mid_blend: 0.12
+    spectral_lead_boost: 0.24
+    spectral_k_ratio: 0.42
+    spectral_gain_strength: 0.36
+    spectral_power_match: 0.42
+    spectral_global_persistence_weight: 0.22
+    spectral_gain_min_k: 2
+    spectral_gain_clip_min: 0.78
+    spectral_gain_clip_max: 1.24
+

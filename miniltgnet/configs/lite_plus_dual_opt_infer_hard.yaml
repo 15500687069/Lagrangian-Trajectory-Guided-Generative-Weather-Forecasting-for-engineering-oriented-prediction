@@ -1,0 +1,32 @@
+base_config: lite_plus_dual_opt.yaml
+
+experiment:
+  name: miniltg_lite_plus_dual_opt_infer_hard
+  output_dir: outputs/miniltg/lite_plus_dual_opt_infer_hard
+
+evaluation:
+  inference_postprocess:
+    enabled: true
+    traj_enabled: true
+    traj_ref_mode: persistence
+    traj_blend_linear: 0.60
+    traj_blend_persistence: 0.25
+    traj_lead_persistence_boost: 0.90
+    traj_confidence_power: 1.9
+    traj_global_persistence_weight: 0.20
+    traj_persistence_prefix_leads: 5
+    traj_prefix_persistence_weight: 1.0
+    traj_speed_sigma: 0.50
+    traj_min_model_weight: 0.15
+    traj_max_correction_deg: 1.00
+    spectral_enabled: true
+    spectral_hf_blend: 0.38
+    spectral_mid_blend: 0.18
+    spectral_lead_boost: 0.32
+    spectral_k_ratio: 0.42
+    spectral_gain_strength: 0.45
+    spectral_power_match: 0.55
+    spectral_global_persistence_weight: 0.30
+    spectral_gain_min_k: 2
+    spectral_gain_clip_min: 0.75
+    spectral_gain_clip_max: 1.30

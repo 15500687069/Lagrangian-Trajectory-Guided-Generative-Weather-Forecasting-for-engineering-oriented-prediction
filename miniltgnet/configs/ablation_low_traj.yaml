@@ -1,0 +1,8 @@
+base_config: lite_plus.yaml
+
+experiment:
+  name: miniltg_ablation_low_traj
+  output_dir: outputs/miniltg/ablation_low_traj
+
+loss:
+  lambda_traj: 0.1

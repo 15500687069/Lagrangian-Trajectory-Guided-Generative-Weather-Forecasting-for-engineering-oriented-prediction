@@ -1,0 +1,15 @@
+base_config: lite.yaml
+
+experiment:
+  name: miniltg_lite_sanity
+  output_dir: outputs/miniltg/lite_sanity
+
+optimization:
+  epochs: 1
+  max_train_batches: 2
+  max_val_batches: 1
+
+evaluation:
+  test_every: 0
+  early_stopping:
+    enabled: false

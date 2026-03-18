@@ -1,0 +1,10 @@
+base_config: stage2_redesign.yaml
+
+experiment:
+  name: ltg_stage2_redesign_sanity
+  output_dir: outputs/stage2_redesign_sanity
+
+optimization:
+  epochs: 2
+  max_train_batches: 2
+  max_val_batches: 1

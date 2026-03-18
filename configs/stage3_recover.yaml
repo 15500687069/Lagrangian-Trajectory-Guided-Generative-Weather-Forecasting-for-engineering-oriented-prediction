@@ -1,0 +1,69 @@
+base_config: stage3_global.yaml
+
+experiment:
+  name: ltg_stage3_recover
+  output_dir: outputs/stage3_recover
+  performance:
+    allow_tf32: true
+    cudnn_benchmark: true
+    matmul_precision: high
+  compile:
+    enabled: false
+    mode: default
+    dynamic: false
+    fullgraph: false
+    strict: false
+
+model:
+  event_modulation:
+    enabled: false
+  trajectory:
+    max_step_deg: 1.2
+  generator:
+    type: latent_diffusion
+    diffusion_steps: 200
+    diffusion_beta_start: 1.0e-4
+    diffusion_beta_end: 2.0e-2
+    residual_forecast: true
+
+loss:
+  combine_mode: fixed_weighted
+  lambda_field: 1.0
+  lambda_traj: 0.3
+  lambda_adv: 0.0
+  lambda_phys: 0.0
+  lambda_spec: 0.0
+  field_extreme_weight: 0.0
+  normalization:
+    enabled: false
+    ema_decay: 0.98
+    eps: 1.0e-6
+  curriculum:
+    enabled: false
+    adv_start_epoch: 0
+    phys_start_epoch: 0
+    spec_start_epoch: 0
+    ramp_epochs: 1
+
+optimization:
+  epochs: 10
+  optimizer:
+    lr: 6.0e-5
+
+evaluation:
+  validate_every: 1
+  save_every: 1
+  checkpoint_metric: loss_field
+  checkpoint_mode: min
+  test_every: 1
+  test_max_batches: 0
+  save_history: true
+  history_file: metrics_history.jsonl
+  test_metrics_file: test_metrics.jsonl
+  early_stopping:
+    enabled: true
+    monitor: loss_field
+    mode: min
+    patience: 3
+    min_delta: 1.0e-4
+    warmup_epochs: 2

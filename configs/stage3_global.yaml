@@ -1,0 +1,40 @@
+base_config: base.yaml
+
+experiment:
+  name: ltg_stage3_global
+  output_dir: outputs/stage3
+
+data:
+  region:
+    enabled: false
+  history_steps: 8
+  forecast_steps: 12
+  dataloader:
+    batch_size: 1
+    num_workers: 0
+
+model:
+  hidden_dim: 128
+  encoder:
+    patch_size: 48
+    depth: 2
+    heads: 4
+    mlp_ratio: 2.0
+  trajectory:
+    mode: stochastic
+    hidden_dim: 128
+    num_samples: 10
+  generator:
+    type: latent_diffusion
+    diffusion_steps: 1000
+    diffusion_beta_start: 1.0e-4
+    diffusion_beta_end: 2.0e-2
+
+loss:
+  lambda_spec: 1.0
+  lambda_phys: 0.6
+
+optimization:
+  epochs: 50
+  optimizer:
+    lr: 1.5e-4

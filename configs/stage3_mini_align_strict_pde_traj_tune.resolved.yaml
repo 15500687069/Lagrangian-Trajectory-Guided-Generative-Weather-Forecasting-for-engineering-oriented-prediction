@@ -1,0 +1,99 @@
+data:
+  dataloader: {batch_size: 1, num_workers: 0, pin_memory: true}
+  era5_path: data/era5_199001.nc
+  forecast_steps: 6
+  history_steps: 4
+  norm_stats_path: data/norm_stats_stage3_mini.npz
+  objects_per_step: 3
+  region: {enabled: true, lat_max: 45.75, lat_min: 10.0, lon_max: 169.75, lon_min: 110.0}
+  skeleton: {max_link_distance_deg: 5.0, min_distance_deg: 3.0, min_track_length: 8,
+    pressure_threshold: 1010.0, type: vorticity_max, vorticity_threshold: 1.2e-05}
+  split: {test_end: '1990-01-31', test_start: '1990-01-24', train_end: '1990-01-15',
+    train_start: '1990-01-01', val_end: '1990-01-23', val_start: '1990-01-16'}
+  stride: 1
+  track_cache_path: data/skeleton_tracks_stage3_mini.nc
+  variables: [z500, z850, u850, v850, t850, q850, msl, tp]
+evaluation:
+  checkpoint_metric: loss_traj
+  checkpoint_mode: min
+  dual_best: {enabled: true, field_filename: best_field.pt, field_mode: min, field_monitor: loss_field,
+    track_filename: best_track.pt, track_mode: min, track_monitor: loss_traj}
+  early_stopping: {enabled: true, min_delta: 0.0001, mode: min, monitor: loss_traj,
+    patience: 4, warmup_epochs: 1}
+  history_file: metrics_history.jsonl
+  metrics: [rmse, acc, track_mae, extreme_f1, spectral_distance]
+  save_every: 1
+  save_history: true
+  test_every: 1
+  test_max_batches: 0
+  test_metrics_file: test_metrics.jsonl
+  validate_every: 1
+experiment:
+  compile: {dynamic: false, enabled: false, fullgraph: false, mode: default, strict: false}
+  device: cuda
+  name: ltg_stage3_mini_align_strict_pde_traj_tune
+  output_dir: outputs/stage3_mini_align_strict_pde_traj_tune
+  performance: {allow_tf32: true, cudnn_benchmark: true, matmul_precision: high}
+  precision: fp32
+  resume_checkpoint: outputs/stage3_mini_align_strict_pde_finetune/best.pt
+  resume_reset_best: true
+  seed: 3407
+  trainable:
+    enabled: true
+    exclude_patterns: []
+    include_patterns: [traj_predictor]
+loss:
+  combine_mode: fixed_weighted
+  compute_inactive_losses: false
+  curriculum: {adv_start_epoch: 2, enabled: false, phys_start_epoch: 0, ramp_epochs: 6,
+    spec_start_epoch: 3}
+  field_extreme_max_elements: 2000000
+  field_extreme_quantile: 0.99
+  field_extreme_weight: 0.0
+  field_l1_weight: 0.7
+  field_l2_weight: 0.3
+  lambda_adv: 0.0
+  lambda_diff: 0.0
+  lambda_field: 0.0
+  lambda_phys: 0.0
+  lambda_spec: 0.0
+  lambda_traj: 1.0
+  normalization: {ema_decay: 0.98, enabled: false, eps: 1.0e-06}
+  physics:
+    divergence_weight: 0.35
+    moist_static_energy_weight: 0.25
+    strict_pde: {continuity_weight: 1.0, continuity_zero_reg: 0.15, enabled: true,
+      f_min: 1.0e-05, geostrophic_weight: 0.6, include_beta_term: true, moisture_weight: 0.8,
+      thermodynamic_weight: 0.8, time_step_hours: 6.0, vorticity_viscosity: 0.0, vorticity_weight: 1.0}
+  spectral_wavenumbers: 64
+model:
+  encoder: {depth: 2, dropout: 0.05, heads: 4, mlp_ratio: 2.0, patch_size: 24}
+  event_modulation: {alpha_ceiling: 2.5, alpha_floor: 0.8, curvature_scale: 2.0, dyn_scale: 1.0,
+    enabled: false, gradient_scale: 1.0, thermo_scale: 1.0}
+  generator:
+    base_channels: 64
+    channel_mults: [1, 2, 4, 8]
+    diffusion_beta_end: 0.02
+    diffusion_beta_start: 0.0001
+    diffusion_steps: 200
+    dropout: 0.1
+    num_res_blocks: 2
+    residual_forecast: true
+    residual_scale: 1.0
+    trend_scale: 0.35
+    type: latent_diffusion
+  hidden_dim: 64
+  trajectory: {diffusion_max: 0.12, diffusion_min: 0.01, hidden_dim: 64, max_step_deg: 6.0,
+    mode: deterministic, num_layers: 2, num_samples: 10}
+optimization:
+  epochs: 38
+  fail_on_nan: true
+  grad_clip_norm: 1.0
+  max_train_batches: 0
+  max_val_batches: 0
+  optimizer:
+    betas: [0.9, 0.999]
+    lr: 1.0e-05
+    name: adamw
+    weight_decay: 0.01
+  scheduler: {min_lr: 1.0e-06, name: cosine, warmup_epochs: 2}

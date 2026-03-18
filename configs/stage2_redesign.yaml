@@ -1,0 +1,35 @@
+base_config: stage2_stochastic.yaml
+
+experiment:
+  name: ltg_stage2_redesign
+  output_dir: outputs/stage2_redesign
+
+model:
+  event_modulation:
+    enabled: false
+
+loss:
+  combine_mode: normalized_weighted
+  lambda_field: 1.0
+  lambda_traj: 1.0
+  lambda_adv: 0.6
+  lambda_phys: 0.2
+  lambda_spec: 0.3
+  normalization:
+    enabled: true
+    ema_decay: 0.97
+    eps: 1.0e-6
+  curriculum:
+    enabled: true
+    adv_start_epoch: 4
+    phys_start_epoch: 10
+    spec_start_epoch: 4
+    ramp_epochs: 6
+
+optimization:
+  epochs: 24
+  optimizer:
+    lr: 1.2e-4
+
+evaluation:
+  checkpoint_metric: loss_total_raw

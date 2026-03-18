@@ -1,0 +1,54 @@
+base_config: lite_plus.yaml
+
+experiment:
+  name: miniltg_lite_plus_track_fix
+  output_dir: outputs/miniltg/lite_plus_track_fix
+  resume_checkpoint: null
+
+model:
+  # Avoid over-shoot from v2 while allowing meaningful movement.
+  traj_max_step_deg: 6.0
+
+loss:
+  # Track-focused but stable.
+  lambda_traj: 0.60
+  traj_scale_deg: 12.0
+  traj_mae_weight: 0.30
+  traj_velocity_weight: 0.15
+  traj_velocity_scale_deg: 12.0
+  traj_smooth_weight: 0.10
+  traj_smooth_scale_deg: 12.0
+
+  # Keep spec loss off in track stage.
+  lambda_spec: 0.0
+
+optimization:
+  epochs: 18
+  lr: 1.8e-4
+
+evaluation:
+  inference_postprocess:
+    enabled: true
+    traj_enabled: true
+    traj_ref_mode: persistence
+    traj_blend_linear: 0.40
+    traj_blend_persistence: 0.14
+    traj_lead_persistence_boost: 0.70
+    traj_confidence_power: 1.6
+    traj_global_persistence_weight: 0.10
+    traj_speed_sigma: 0.65
+    traj_min_model_weight: 0.25
+    traj_max_correction_deg: 1.20
+    spectral_enabled: true
+    spectral_hf_blend: 0.24
+    spectral_mid_blend: 0.10
+    spectral_lead_boost: 0.22
+    spectral_k_ratio: 0.42
+    spectral_gain_strength: 0.32
+    spectral_power_match: 0.38
+    spectral_gain_min_k: 2
+    spectral_gain_clip_min: 0.80
+    spectral_gain_clip_max: 1.22
+  early_stopping:
+    patience: 5
+    warmup_epochs: 3
