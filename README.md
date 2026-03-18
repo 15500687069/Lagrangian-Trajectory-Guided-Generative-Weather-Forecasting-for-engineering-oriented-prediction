@@ -1,4 +1,4 @@
-Lagrangian Trajectory Guided Generative Weather Forecasting for engineering-oriented prediction.
+# Lagrangian Trajectory Guided Generative Weather Forecasting for engineering-oriented prediction.
 
 ## 1. Project Positioning
 
@@ -161,6 +161,8 @@ Please follow ERA5/C3S data license and attribution requirements when publishing
 
 - Contact: Yuzhi Wang (wangyzh267@mail2.sysu.edu.cn)
 - Institution: College of Atmospheric Sciences, Sun Yat-sen University
+
+# Details of project
 ## Install
 
 ```bash
@@ -442,62 +444,6 @@ PowerShell:
 powershell -ExecutionPolicy Bypass -File scripts/run_research_full.ps1
 ```
 
-## Tropical Depression Water-Pump Research Pipeline
-
-This repository also includes an end-to-end research script for the South China Sea
-non-monsoon tropical depression workflow:
-
-- Download ERA5 pressure/single-level data.
-- Download GPM DPR granules.
-- Identify water pumps from 3D reflectivity.
-- Compute OIDRA and local MSE variance.
-- Build multi-snapshot sample library and summary tables.
-- Reproduce core publication-style figures from the original notebook.
-
-Config file:
-
-```bash
-configs/td_waterpump_research.yaml
-```
-
-Run:
-
-```bash
-python scripts/td_waterpump_research.py --config configs/td_waterpump_research.yaml
-```
-
-Dump default config template:
-
-```bash
-python scripts/td_waterpump_research.py --dump-default-config
-```
-
-Credential notes:
-
-- ERA5: configure CDS API (`~/.cdsapirc`) or set env var `CDSAPI_KEY`.
-- GPM: use Earthdata login (`.netrc`) or set env var `EARTHDATA_TOKEN`.
-
-Key outputs:
-
-- `sample_library.csv`: raw snapshot sample library.
-- `sample_library_filtered.csv`: filtered library after QC/exclusion rules.
-- `sample_exclusion_log.csv`: exclusion reasons by snapshot.
-- `water_pump_catalog.csv`: per-pump spatial/structure records.
-- `oidra_precip_summary.csv`: high/low OIDRA grouped means.
-- `organization_precip_stats.json`: group test + correlation statistics.
-- `mechanism_chain_summary.md`: auto-generated mechanism-chain wording.
-
-How this supports the three-step research progression:
-
-1. Sample library construction:
-`sample_library.csv` stores snapshot-level pump count, pump positions, OIDRA, MSE variance,
-precipitation intensity, and precipitation-type fractions.
-2. Organization-precipitation comparison:
-`sample_library_filtered.csv`, `oidra_precip_summary.csv`, and `organization_precip_stats.json`
-support high/low OIDRA grouped comparison and statistical testing.
-3. Mechanism-chain expression:
-`mechanism_chain_summary.md` auto-generates an interpretable statement linking
-environment uniformity, organization, and precipitation structure.
 
 ## MiniLTGNet (Local Lightweight Validation)
 
